@@ -11,7 +11,21 @@ services:
     env_file:
       - ./secret/.env
     ports:
-      - 5173:5173
+      - "5173:5173"
+    networks:
+      - app_network
+
+  backend:
+    image: app_back:local
+    build:
+      context: .
+      dockerfile: docker/back.Dockerfile
+    volumes:
+      - ./backend/:/code
+    env_file:
+      - ./secret/.env
+    ports:
+      - "8080:8080"
     networks:
       - app_network
 
@@ -30,11 +44,34 @@ services:
       - POSTGRES_PASSWORD=app_password
       - POSTGRES_DB=app_db
       - POSTGRES_HOST=postgres
+
+  redis:
+    image: redis:7
+    container_name: redis_container
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4_container
+    restart: always
+    ports:
+      - "8888:80"
+    networks:
+      - app_network
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user-name@domain-name.com
+      PGADMIN_DEFAULT_PASSWORD: strong-password
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
 volumes:
   db_data:
-  app_back_node_modules:
   app_front_node_modules:
+  pgadmin-data:
 
 networks:
   app_network:
-
+    driver: bridge
