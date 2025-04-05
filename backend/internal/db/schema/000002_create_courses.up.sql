@@ -1,5 +1,3 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -12,19 +10,19 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE TABLE users (
-    user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
+CREATE TABLE courses (
+    course_id SERIAL PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    course_name VARCHAR(255) NOT NULL,
+    total_points_possible INTEGER NOT NULL CHECK (total_points_possible >= 1 AND total_points_possible <= 100),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_courses_user_id ON courses(user_id);
 
-CREATE TRIGGER trigger_users_updated_at
-BEFORE UPDATE ON users
+CREATE TRIGGER trigger_courses_updated_at
+BEFORE UPDATE ON courses
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
-
 

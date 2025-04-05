@@ -1,6 +1,6 @@
 folder=$(shell basename $(CURDIR))
 include ./secret/.env
-MIGRATION_PATH=./internal/database/postgres/migrations
+MIGRATION_PATH=./internal/db/schema
 
 clear-dist:
 	rm -rf frontend/build
@@ -32,3 +32,6 @@ migrate-up:
 
 migrate-down:
 	docker compose -f docker-compose.yml --env-file ./secret/.env run --rm backend migrate -path $(MIGRATION_PATH) -database $(DB_ADDRESS) down $(filter-out $@,$(MAKECMDGOALS))
+
+generate:
+	docker compose -f docker-compose.yml --env-file ./secret/.env run --rm backend sqlc generate
